@@ -183,17 +183,7 @@ export default function PersonalHub({ tasks }: PersonalHubProps) {
                         />
                     </div>
 
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-                        <h3 className="font-semibold text-slate-200 mb-4">Task Quick View</h3>
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                            {tasks.slice(0, 3).map(task => (
-                                <div key={task._id} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                                    <p className="text-xs font-medium text-slate-300 line-clamp-1">{task.title}</p>
-                                </div>
-                            ))}
-                            {tasks.length === 0 && <p className="text-center text-slate-600 text-xs py-4">No tasks</p>}
-                        </div>
-                    </div>
+
                 </div>
 
                 {/* Main Content Area */}

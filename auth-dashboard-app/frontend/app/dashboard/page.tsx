@@ -266,41 +266,43 @@ function DashboardContent() {
                             <p className="text-slate-400 text-lg">Welcome back, {user?.name?.split(' ')[0] || 'User'} 👋</p>
                         </div>
                         <div className="flex gap-3">
-                            <button
-                                onClick={async () => {
-                                    if (tasks.length === 0) {
-                                        toast.error('There are no tasks available to prioritize!');
-                                        return;
-                                    }
-                                    const toastId = toast.loading('AI is analyzing your tasks...');
-                                    try {
-                                        const res = await api.post('/tasks/prioritize');
-                                        const suggestions = res.data.data.suggestions;
-
-                                        if (suggestions.length > 0) {
-                                            // Apply updates locally for instant feedback
-                                            const newTasks = [...tasks];
-                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                            suggestions.forEach((s: any) => {
-                                                const task = newTasks.find(t => t._id === s.id);
-                                                if (task) task.priority = s.newPriority;
-                                                api.put(`/tasks/${s.id}`, { priority: s.newPriority }); // Persist
-                                            });
-                                            setTasks(newTasks);
-                                            toast.success(`Updated ${suggestions.length} tasks based on urgency! ⚡`, { id: toastId });
-                                        } else {
-                                            toast.success('Your tasks are already perfectly prioritized! 🤖', { id: toastId });
+                            {filterTab !== 'mine' && (
+                                <button
+                                    onClick={async () => {
+                                        if (tasks.length === 0) {
+                                            toast.error('There are no tasks available to prioritize!');
+                                            return;
                                         }
-                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                    } catch (_err) {
-                                        toast.error('AI prioritization failed', { id: toastId });
-                                    }
-                                }}
-                                className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-purple-700 transition shadow-lg shadow-purple-900/20"
-                            >
-                                <span className="text-lg">✨</span>
-                                AI Prioritize
-                            </button>
+                                        const toastId = toast.loading('AI is analyzing your tasks...');
+                                        try {
+                                            const res = await api.post('/tasks/prioritize');
+                                            const suggestions = res.data.data.suggestions;
+
+                                            if (suggestions.length > 0) {
+                                                // Apply updates locally for instant feedback
+                                                const newTasks = [...tasks];
+                                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                suggestions.forEach((s: any) => {
+                                                    const task = newTasks.find(t => t._id === s.id);
+                                                    if (task) task.priority = s.newPriority;
+                                                    api.put(`/tasks/${s.id}`, { priority: s.newPriority }); // Persist
+                                                });
+                                                setTasks(newTasks);
+                                                toast.success(`Updated ${suggestions.length} tasks based on urgency! ⚡`, { id: toastId });
+                                            } else {
+                                                toast.success('Your tasks are already perfectly prioritized! 🤖', { id: toastId });
+                                            }
+                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                        } catch (_err) {
+                                            toast.error('AI prioritization failed', { id: toastId });
+                                        }
+                                    }}
+                                    className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium flex items-center gap-2 hover:bg-purple-700 transition shadow-lg shadow-purple-900/20"
+                                >
+                                    <span className="text-lg">✨</span>
+                                    AI Prioritize
+                                </button>
+                            )}
                             <button
                                 onClick={() => {
                                     if (!currentSpace) {
@@ -382,46 +384,48 @@ function DashboardContent() {
                                 </div>
 
                                 {/* Team Collaboration Card */}
-                                <div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-5 hover:border-slate-600/40 transition col-span-1 md:col-span-2 lg:col-span-2">
-                                    <div className="flex flex-col gap-4">
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-xl">👥</span>
-                                                <h3 className="font-bold text-white text-lg">Team Members</h3>
-                                            </div>
-                                            <p className="text-slate-400 text-sm">Members of {currentSpace?.name || 'this space'}</p>
-                                        </div>
-
-                                        <div className="flex -space-x-4 overflow-hidden py-2 items-center">
-                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                            {currentSpace?.members && Array.isArray(currentSpace.members) && currentSpace.members.map((member: any, i: number) => (
-                                                <div key={member._id || i} className="inline-block h-12 w-12 rounded-full ring-2 ring-[#1a2642] bg-blue-600 text-white flex items-center justify-center font-bold text-md shadow-lg transform hover:-translate-y-1 transition duration-300 relative group cursor-help">
-                                                    {member.avatar ? (
-                                                        <img src={member.avatar} alt={member.name} className="h-full w-full rounded-full object-cover" />
-                                                    ) : (
-                                                        member.name?.charAt(0).toUpperCase() || 'U'
-                                                    )}
-                                                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                                                        {member.name}
-                                                    </span>
+                                {filterTab !== 'mine' && (
+                                    <div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-5 hover:border-slate-600/40 transition col-span-1 md:col-span-2 lg:col-span-2">
+                                        <div className="flex flex-col gap-4">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-xl">👥</span>
+                                                    <h3 className="font-bold text-white text-lg">Team Members</h3>
                                                 </div>
-                                            ))}
-                                            <button
-                                                onClick={() => {
-                                                    if (!currentSpace) {
-                                                        toast.error('Please create or select a space first');
-                                                        return;
-                                                    }
-                                                    setShowInviteModal(true);
-                                                }}
-                                                className={`h-12 w-12 rounded-full bg-slate-700/50 border border-dashed border-slate-500 text-slate-400 flex items-center justify-center hover:bg-slate-700 hover:text-white hover:border-slate-400 transition ${currentSpace?.members && currentSpace.members.length > 0 ? 'ml-4' : ''}`}
-                                                title="Invite new member"
-                                            >
-                                                <Plus className="w-5 h-5" />
-                                            </button>
+                                                <p className="text-slate-400 text-sm">Members of {currentSpace?.name || 'this space'}</p>
+                                            </div>
+
+                                            <div className="flex -space-x-4 overflow-hidden py-2 items-center">
+                                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                                {currentSpace?.members && Array.isArray(currentSpace.members) && currentSpace.members.map((member: any, i: number) => (
+                                                    <div key={member._id || i} className="inline-block h-12 w-12 rounded-full ring-2 ring-[#1a2642] bg-blue-600 text-white flex items-center justify-center font-bold text-md shadow-lg transform hover:-translate-y-1 transition duration-300 relative group cursor-help">
+                                                        {member.avatar ? (
+                                                            <img src={member.avatar} alt={member.name} className="h-full w-full rounded-full object-cover" />
+                                                        ) : (
+                                                            member.name?.charAt(0).toUpperCase() || 'U'
+                                                        )}
+                                                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                                                            {member.name}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    onClick={() => {
+                                                        if (!currentSpace) {
+                                                            toast.error('Please create or select a space first');
+                                                            return;
+                                                        }
+                                                        setShowInviteModal(true);
+                                                    }}
+                                                    className={`h-12 w-12 rounded-full bg-slate-700/50 border border-dashed border-slate-500 text-slate-400 flex items-center justify-center hover:bg-slate-700 hover:text-white hover:border-slate-400 transition ${currentSpace?.members && currentSpace.members.length > 0 ? 'ml-4' : ''}`}
+                                                    title="Invite new member"
+                                                >
+                                                    <Plus className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
                             </div>
                         )
