@@ -1,116 +1,139 @@
-# APS Resume Scanner & Dashboard
+# TaskFlow
 
-This repository contains a comprehensive full-stack application suite consisting of:
-1.  **Auth & Dashboard App**: A MERN stack project featuring authentication, task management, and a modern dashboard.
-2.  **Resume Builder**: A Next.js AI-powered tool for parsing and enhancing resumes.
+TaskFlow is a robust, full-stack task management solution designed to enhance team collaboration and individual productivity. Built with a focus on scalability, performance, and modern architectural patterns, it demonstrates a complete MERN stack implementation with type safety and responsive design.
 
-## 🛠️ Tech Stack
+## Project Overview
 
-### Auth Dashboard (Full-Stack)
--   **Frontend**: Next.js 15 (App Router), TypeScript, TailwindCSS, Lucide React, Dnd-kit (Kanban), Framer Motion.
--   **Backend**: Node.js, Express.js, MongoDB (Mongoose), JWT Authentication, Helmet, Morgan (Logging).
+This repository houses a comprehensive application suite featuring:
+1.  **Task Management Dashboard**: A real-time interface for managing tasks, teams, and projects.
+2.  **Resume Parsing Engine**: An integrated utility leveraging AI for document analysis.
 
-### Resume Builder (AI Tool)
--   **Framework**: Next.js 16 (App Router), TypeScript.
--   **AI Integration**: Vercel AI SDK, Google Gemini API / OpenAI API.
--   **Document Processing**: `mammoth` (DOCX), `pdf2json` (PDF), `html2pdf.js`.
--   **Styling**: TailwindCSS, Shadcn/UI patterns.
+## Technology Architecture
+
+### Backend (API Service)
+*   **Runtime**: Node.js with Express.js
+*   **Database**: MongoDB with Mongoose ODM
+*   **Authentication**: JWT-based stateless authentication with secure cookie management
+*   **Security**: Helmet for header security, Express Rate Limit for DDoS protection
+*   **Validation**: Express Validator for strict input sanitization
+*   **Logging**: Morgan for request monitoring
+
+### Frontend (Client Application)
+*   **Framework**: Next.js 15 (App Router) for server-side rendering
+*   **Language**: TypeScript for static type checking
+*   **Styling**: TailwindCSS for utility-first design
+*   **State Management**: React Context API
+*   **UI Components**: Radix UI primitives, Lucide React icons
+*   **Interactivity**: Framer Motion for animations, Dnd-kit for accessible drag-and-drop
 
 ---
 
-## 🚀 Setup & Installation
+## Setup and Installation
 
 ### Prerequisites
--   Node.js (v18+)
--   MongoDB (Running locally or Atlas URI)
+*   Node.js v18 or later
+*   MongoDB v6.0 or later (Local or Atlas)
 
-### 1. auth-dashboard-app (Backend & Frontend)
+### 1. Repository Setup
+Clone the repository and navigate to the project root:
 
-**Backend Setup**
+```bash
+git clone https://github.com/YOUR_USERNAME/aps-resume-scanner.git
+cd aps-resume-scanner
+```
+
+### 2. Setup and Run Backend (API)
+Navigate to the backend service directory:
+
 ```bash
 cd auth-dashboard-app/backend
-npm install
-# Create .env file (copy from .env.example)
-cp .env.example .env
-# Start the server
-npm run dev
 ```
 
-**Frontend Setup**
+Install dependencies:
 ```bash
-cd auth-dashboard-app/frontend
 npm install
-npm run dev
 ```
 
-### 2. resume-builder (AI Tool)
-
-```bash
-cd resume-builder
-npm install
-# Configure AI keys in .env
-cp .env.example .env.local
-npm run dev
-```
-
----
-
-## 🔑 Environment Variables
-
-**Backend (`auth-dashboard-app/backend/.env`)**
+Create a `.env` file in the backend directory with the following configuration:
 ```env
 PORT=5000
+NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/auth-dashboard
-JWT_SECRET=your_secret_key
+JWT_SECRET=your_secure_jwt_secret
 JWT_EXPIRES_IN=7d
 FRONTEND_URL=http://localhost:3000
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=1000
 ```
 
-**Resume Builder (`resume-builder/.env.local`)**
-```env
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_key
-OPENAI_API_KEY=your_openai_key # Optional if using Gemini
+Start the API server:
+```bash
+npm run dev
 ```
 
----
-
-## 💾 Database Seeding & Demo Credentials
-
-To populate the database with demo users and tasks:
+### 3. Database Initialization
+This project includes a seeding script to populate the database with demonstration data. Open a new terminal in the `backend` directory and run:
 
 ```bash
-cd auth-dashboard-app/backend
 npm run seed
 ```
+This will create Admin and Member users along with sample tasks and teams.
 
-### Demo User 1
--   **Email**: `john@example.com`
--   **Password**: `Password123`
+### 4. Setup and Run Frontend (Client)
+Navigate to the frontend application directory:
 
-### Demo User 2
--   **Email**: `jane@example.com`
--   **Password**: `Password123`
+```bash
+cd auth-dashboard-app/frontend
+```
+
+Install dependencies:
+```bash
+npm install
+```
+
+Start the development server:
+```bash
+npm run dev
+```
+The application will be accessible at http://localhost:3000.
 
 ---
 
-## 📚 API Documentation
+## Access & Registration
 
-A Postman collection is included in the repository for testing backend endpoints:
-📄 `auth-dashboard-app/TaskFlow-API.postman_collection.json`
+### Demo Credentials
+After running the seed script, you may log in with the following credentials:
 
-Import this file into Postman to access pre-configured requests for Auth, Tasks, Teams, and Profile endpoints.
+**Administrator Access**
+*   Email: john@example.com
+*   Password: Password123
+
+**Standard User Access**
+*   Email: jane@example.com
+*   Password: Password123
+
+### Create Your Own Account
+You can also register a new account to test the full signup flow:
+1.  Navigate to the login page (`http://localhost:3000/login`).
+2.  Click the **"Sign Up"** link.
+3.  Enter your details to create a personalized account.
 
 ---
 
-## 📈 Production Scaling Strategy
+## API Documentation
 
-To scale this application for production:
+The backend API is fully documented via a Postman collection included in the repository. Provide this collection to consumers of the API for integration details.
 
-1.  **Deployment**: Dockerize both frontend and backend services. Deploy using container orchestration (Kubernetes or AWS ECS) for easy horizontal scaling.
-2.  **Database**: Use MongoDB Atlas with sharding for high availability. Implement database indexing on high-frequency query fields (e.g., `userId`, `email`, `status`).
-3.  **Caching**: Integrate Redis to cache user sessions, comprehensive profile data, and expensive API responses to reduce database load.
-4.  **Security**: Enforce strict CORS policies (whitelist only production domains), use secure headers (Helmet), and manage secrets via AWS Secrets Manager or HashiCorp Vault.
-5.  **Load Balancing**: Place a load balancer (Nginx or AWS ALB) in front of the backend instances to distribute traffic evenly.
-6.  **CI/CD**: Implement automated pipelines (GitHub Actions) for testing, building, and deploying to staging/production environments.
+**Location**: `auth-dashboard-app/TaskFlow-API.postman_collection.json`
+
+---
+
+## Production Readiness and Scaling
+
+To transition this application to a high-load production environment, the following strategies are recommended:
+
+1.  **Horizontal Scaling**: Containerize services using Docker and orchestrate with Kubernetes. This allows independent scaling of the stateless API layer based on CPU/Memory load.
+2.  **Database Optimization**: Deploy MongoDB on a sharded cluster (e.g., MongoDB Atlas). Implement compound indexing on `userId`, `status`, and `createdAt` fields to optimize query performance.
+3.  **Caching Layer**: Introduce Redis to cache session data and expensive read operations (such as user profiles or dashboard analytics), reducing direct database hits.
+4.  **Load Balancing**: Utilize Nginx or AWS Application Load Balancer (ALB) to distribute incoming traffic evenly across backend instances and handle SSL termination.
+5.  **CI/CD Automation**: Implement GitHub Actions pipelines for automated testing (Jest) and deployment verification to maintain code quality.
