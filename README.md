@@ -99,6 +99,26 @@ The application will be accessible at http://localhost:3000.
 
 ---
 
+### 5. Setup and Run Resume Builder
+Navigate to the resume builder directory:
+
+```bash
+cd builder
+```
+
+Install dependencies:
+```bash
+npm install
+```
+
+Start the development server:
+```bash
+npm run dev
+```
+The resume builder will be accessible at http://localhost:3001 (or the next available port).
+
+---
+
 ## Access & Registration
 
 ### Demo Credentials
