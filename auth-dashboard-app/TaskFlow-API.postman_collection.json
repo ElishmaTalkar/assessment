@@ -1,0 +1,405 @@
+{
+    "info": {
+        "name": "TaskFlow API",
+        "description": "Complete API collection for TaskFlow - Auth + Dashboard Application",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000/api/v1",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Signup",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/signup",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "signup"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.collectionVariables.set('token', response.data.token);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Profile",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/profile/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "profile",
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Updated\",\n  \"bio\": \"Full-stack developer passionate about building great products\",\n  \"phone\": \"+1234567890\",\n  \"location\": \"San Francisco, CA\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/profile/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "profile",
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Tasks",
+            "item": [
+                {
+                    "name": "Get All Tasks",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Tasks with Filters",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks?status=pending&priority=high&search=project",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "pending"
+                                },
+                                {
+                                    "key": "priority",
+                                    "value": "high"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "project"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Task Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks",
+                                "stats"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Single Task",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks/:taskId",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks",
+                                ":taskId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "taskId",
+                                    "value": "TASK_ID_HERE"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Task",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Complete project documentation\",\n  \"description\": \"Write comprehensive documentation for the API\",\n  \"status\": \"pending\",\n  \"priority\": \"high\",\n  \"dueDate\": \"2026-02-10\",\n  \"tags\": [\"documentation\", \"api\", \"urgent\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Task",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated task title\",\n  \"description\": \"Updated description\",\n  \"status\": \"in-progress\",\n  \"priority\": \"medium\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks/:taskId",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks",
+                                ":taskId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "taskId",
+                                    "value": "TASK_ID_HERE"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Task",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/tasks/:taskId",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "tasks",
+                                ":taskId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "taskId",
+                                    "value": "TASK_ID_HERE"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:5000/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "5000",
+                    "path": [
+                        "health"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+# Root .gitignore
+node_modules
+.env
+.env.local
+.env.production
+*.log
+.DS_Store
+dist
+build
+coverage
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+Thumbs.db

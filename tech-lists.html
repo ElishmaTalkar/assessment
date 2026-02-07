@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Programs - TYBTECH, SYTECH, FYBTECH</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .lists-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .list-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .list-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .list-card h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .list-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-card li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            color: #333;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .list-card li:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .list-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 15px;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .list-card li:hover::before {
+            color: white;
+        }
+
+        /* Different colors for each card */
+        .list-card:nth-child(1) h2 {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .list-card:nth-child(2) h2 {
+            color: #f093fb;
+            border-bottom-color: #f093fb;
+        }
+
+        .list-card:nth-child(3) h2 {
+            color: #4facfe;
+            border-bottom-color: #4facfe;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .list-card h2 {
+                font-size: 1.5rem;
+            }
+
+            .lists-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>B.Tech Programs Overview</h1>
+        
+        <div class="lists-wrapper">
+            <!-- TYBTECH List -->
+            <div class="list-card">
+                <h2>TYBTECH (Third Year B.Tech)</h2>
+                <ul>
+                    <li>Advanced Data Structures</li>
+                    <li>Database Management Systems</li>
+                    <li>Operating Systems</li>
+                    <li>Computer Networks</li>
+                    <li>Software Engineering</li>
+                    <li>Web Technologies</li>
+                    <li>Theory of Computation</li>
+                    <li>Microprocessors & Interfacing</li>
+                </ul>
+            </div>
+
+            <!-- SYTECH List -->
+            <div class="list-card">
+                <h2>SYTECH (Second Year B.Tech)</h2>
+                <ul>
+                    <li>Data Structures</li>
+                    <li>Object-Oriented Programming</li>
+                    <li>Digital Electronics</li>
+                    <li>Discrete Mathematics</li>
+                    <li>Computer Organization</li>
+                    <li>Engineering Mathematics III</li>
+                    <li>Probability & Statistics</li>
+                    <li>Python Programming</li>
+                </ul>
+            </div>
+
+            <!-- FYBTECH List -->
+            <div class="list-card">
+                <h2>FYBTECH (First Year B.Tech)</h2>
+                <ul>
+                    <li>Engineering Mathematics I & II</li>
+                    <li>Engineering Physics</li>
+                    <li>Engineering Chemistry</li>
+                    <li>Basic Electrical Engineering</li>
+                    <li>Engineering Mechanics</li>
+                    <li>C Programming</li>
+                    <li>Engineering Graphics</li>
+                    <li>Communication Skills</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

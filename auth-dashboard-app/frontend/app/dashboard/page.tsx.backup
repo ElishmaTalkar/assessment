@@ -1,0 +1,610 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/lib/api';
+import { Task, TaskStats } from '@/lib/types';
+import toast from 'react-hot-toast';
+import {
+    LayoutDashboard,
+    Plus,
+    Edit2,
+    Trash2,
+    X,
+    LogOut,
+    User,
+    ListTodo,
+    Menu,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+
+export default function DashboardPage() {
+    return (
+        <ProtectedRoute>
+            <DashboardContent />
+        </ProtectedRoute>
+    );
+}
+
+function DashboardContent() {
+    const { user, logout } = useAuth();
+    const router = useRouter();
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [stats, setStats] = useState<TaskStats | null>({ total: 0, pending: 0, 'in-progress': 0, completed: 0 });
+    const [loading, setLoading] = useState(true);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [filterTab, setFilterTab] = useState('all');
+
+    useEffect(() => {
+        fetchTasks();
+        fetchStats();
+    }, []);
+
+    const fetchTasks = async () => {
+        try {
+            const response = await api.get('/tasks');
+            setTasks(response.data.data.tasks);
+        } catch (error: any) {
+            toast.error('Failed to fetch tasks');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchStats = async () => {
+        try {
+            const response = await api.get('/tasks/stats');
+            setStats(response.data.data.stats);
+        } catch (error) {
+            console.error('Failed to fetch stats');
+        }
+    };
+
+    const handleDeleteTask = async (taskId: string) => {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        try {
+            await api.delete(`/tasks/${taskId}`);
+            toast.success('Task deleted successfully');
+            fetchTasks();
+            fetchStats();
+        } catch (error: any) {
+            toast.error('Failed to delete task');
+        }
+    };
+
+    const handleLogout = () => {
+        router.push('/');
+        setTimeout(() => {
+            logout();
+        }, 50);
+    };
+
+    const filteredTasks = tasks.filter(task => {
+        if (filterTab === 'all') return true;
+        if (filterTab === 'active') return task.status !== 'completed';
+        if (filterTab === 'completed') return task.status === 'completed';
+        return true;
+    });
+
+    return (
+        <div className="min-h-screen bg-[#0f1729]">
+            <style jsx global>{`
+                @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+                
+                body { 
+                    font-family: 'Inter', sans-serif;
+                    background: #0f1729;
+                }
+            `}</style>
+
+            {/* Loading Overlay */}
+            {loading && (
+                <div className="fixed inset-0 bg-[#0f1729] z-[100] flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="text-slate-400 font-medium">Loading Dashboard...</p>
+                </div>
+            )}\n\n            {/* Sidebar Overlay */}\n            {sidebarOpen && (\n                <div\n                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"\n                    onClick={() => setSidebarOpen(false)}\n                />\n            )}\n\n            {/* Sidebar */}\n            <aside className={`fixed top-0 left-0 h-full w-[280px] bg-[#1a2642] border-r border-slate-700/20 z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'\n                }`}>\n                <div className="p-6">\n                    <div className="mb-10 flex items-center justify-between">\n                        <div className="flex items-center gap-3">\n                            <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center">\n                                <LayoutDashboard className="w-6 h-6 text-white" />\n                            </div>\n                            <h2 className="text-xl font-bold text-white">TaskFlow</h2>\n                        </div>\n                        <button\n                            onClick={() => setSidebarOpen(false)}\n                            className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded transition"\n                        >\n                            <X className="w-5 h-5" />\n                        </button>\n                    </div>\n\n                    <nav className="space-y-1">\n                        <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-500/10 border-l-3 border-l-blue-500 text-white rounded-r font-medium transition">\n                            <LayoutDashboard className="w-5 h-5" />\n                            <span>Dashboard</span>\n                        </button>\n                        <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-700/30 rounded transition">\n                            <ListTodo className="w-5 h-5" />\n                            <span>My Tasks</span>\n                        </button>\n                        <button onClick={() => { setShowProfileModal(true); setSidebarOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-700/30 rounded transition">\n                            <User className="w-5 h-5" />\n                            <span>Profile</span>\n                        </button>\n                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-red-400 hover:bg-slate-700/30 rounded transition mt-8">\n                            <LogOut className="w-5 h-5" />\n                            <span>Logout</span>\n                        </button>\n                    </nav>\n                </div>\n            </aside >\n\n            {/* Main Content */ } \n < main className = "min-h-screen" >\n                {/* Top Bar with Hamburger */ } \n < div className = "px-8 py-6" >\n < button\n                        onClick = {() => setSidebarOpen(!sidebarOpen)
+} \n                        className = "text-white hover:text-slate-300 transition"\n                        style = {{ \n                            background: 'transparent', \n                            border: 'none', \n                            padding: 0, \n                            boxShadow: 'none', \n                            outline: 'none'\n }}\n >\n < Menu className = "w-6 h-6" />\n                    </button >\n                </div >
+
+
+    {/* Page Content */ }
+    < div className = "px-8 py-12 max-w-[1400px] mx-auto" >
+        {/* Page Header */ }
+        < div className = "mb-8" >
+                        <h1 className="text-7xl font-bold mb-2 text-white" style={{ fontFamily: "'Bodoni Moda', serif", letterSpacing: '-0.02em' }}>
+                            Dashboard
+                        </h1>
+                        <p className="text-slate-400 text-lg">Welcome back, {user?.name?.split(' ')[0] || 'Elishma'} 👋</p>
+                    </div >
+
+    {/* Dashboard Header with New Task Button */ }
+    < div className = "flex justify-end mb-8" >
+        <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-6 py-2.5 bg-blue-600 text-white rounded font-medium flex items-center gap-2 hover:bg-blue-700 transition text-sm"
+        >
+            <Plus className="w-4 h-4" />
+            New Task
+        </button>
+                    </div >
+
+    {/* Stats Grid */ }
+{
+    stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-5 hover:border-slate-600/40 transition">
+                <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Tasks</span>
+                    <span className="text-xl">📋</span>
+                </div>
+                <div className="text-5xl font-bold mb-1 text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>{stats.total}</div>
+                <div className="text-xs text-slate-500">All active tasks</div>
+            </div>
+
+            <div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-5 hover:border-slate-600/40 transition">
+                <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending</span>
+                    <span className="text-xl">📝</span>
+                </div>
+                <div className="text-5xl font-bold mb-1 text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>{stats.pending}</div>
+                <div className="text-xs text-slate-500">Awaiting action</div>
+            </div>
+
+            <div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-5 hover:border-slate-600/40 transition">
+                <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">In Progress</span>
+                    <span className="text-xl">⚡</span>
+                </div>
+                <div className="text-5xl font-bold mb-1 text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>{stats['in-progress']}</div>
+                <div className="text-xs text-slate-500">Currently working</div>
+            </div>
+
+            <div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-5 hover:border-slate-600/40 transition">
+                <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Completed</span>
+                    <span className="text-xl">✓</span>
+                </div>
+                <div className="text-5xl font-bold mb-1 text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>{stats.completed}</div>
+                <div className="text-xs text-slate-500">Finished tasks</div>
+            </div>
+        </div>
+    )
+}
+
+{/* Tasks Table */ }
+<div className="bg-[#1a2642] border border-slate-700/20 rounded-lg p-8">
+    <div className="flex justify-between items-center mb-8">
+        <h2 className="text-4xl font-semibold text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>Tasks</h2>
+        <div className="flex gap-2">
+            <button
+                onClick={() => setFilterTab('all')}
+                className={`px-4 py-1.5 rounded text-sm font-medium transition ${filterTab === 'all' ? 'bg-blue-600 text-white' : 'bg-transparent border border-slate-600 text-slate-400 hover:border-slate-500'}`}
+            >
+                All
+            </button>
+            <button
+                onClick={() => setFilterTab('active')}
+                className={`px-4 py-1.5 rounded text-sm font-medium transition ${filterTab === 'active' ? 'bg-blue-600 text-white' : 'bg-transparent border border-slate-600 text-slate-400 hover:border-slate-500'}`}
+            >
+                Active
+            </button>
+            <button
+                onClick={() => setFilterTab('completed')}
+                className={`px-4 py-1.5 rounded text-sm font-medium transition ${filterTab === 'completed' ? 'bg-blue-600 text-white' : 'bg-transparent border border-slate-600 text-slate-400 hover:border-slate-500'}`}
+            >
+                Completed
+            </button>
+        </div>
+    </div>
+
+    {filteredTasks.length === 0 ? (
+        <div className="text-center py-20 text-slate-400">
+            <p className="text-lg mb-4">No tasks found</p>
+            <button
+                onClick={() => setShowCreateModal(true)}
+                className="px-6 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition"
+            >
+                Create First Task
+            </button>
+        </div>
+    ) : (
+        <div className="overflow-x-auto">
+            <table className="w-full">
+                <thead>
+                    <tr className="border-b border-slate-700/20">
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">#</th>
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Title</th>
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</th>
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Due Date</th>
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</th>
+                        <th className="text-left py-4 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filteredTasks.map((task, index) => (
+                        <TaskRow
+                            key={task._id}
+                            task={task}
+                            index={index + 1}
+                            onEdit={() => setEditingTask(task)}
+                            onDelete={() => handleDeleteTask(task._id)}
+                        />
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    )}
+</div>
+                </div >
+            </main >
+
+    {/* Modals */ }
+{
+    showCreateModal && (
+        <TaskModal
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={() => {
+                setShowCreateModal(false);
+                fetchTasks();
+                fetchStats();
+            }}
+        />
+    )
+}
+
+{
+    editingTask && (
+        <TaskModal
+            task={editingTask}
+            onClose={() => setEditingTask(null)}
+            onSuccess={() => {
+                setEditingTask(null);
+                fetchTasks();
+                fetchStats();
+            }}
+        />
+    )
+}
+
+{
+    showProfileModal && (
+        <ProfileModal
+            onClose={() => setShowProfileModal(false)}
+            onSuccess={() => setShowProfileModal(false)}
+        />
+    )
+}
+        </div >
+    );
+}
+
+// Task Row Component
+function TaskRow({ task, index, onEdit, onDelete }: { task: Task; index: number; onEdit: () => void; onDelete: () => void }) {
+    const getStatusBadge = (status: string) => {
+        const styles = {
+            'in-progress': { bg: 'bg-blue-600', text: 'text-white', label: 'In Progress' },
+            'pending': { bg: 'bg-amber-600', text: 'text-white', label: 'Pending' },
+            'completed': { bg: 'bg-green-600', text: 'text-white', label: 'Completed' },
+        };
+        return styles[status as keyof typeof styles] || styles.pending;
+    };
+
+    const getPriorityColor = (priority: string) => {
+        const colors = {
+            'high': 'text-red-500',
+            'medium': 'text-amber-500',
+            'low': 'text-green-500',
+        };
+        return colors[priority as keyof typeof colors] || colors.medium;
+    };
+
+    const statusInfo = getStatusBadge(task.status);
+
+    return (
+        <tr className="border-b border-slate-700/10 hover:bg-slate-700/10 transition">
+            <td className="py-5 px-4 text-slate-400 text-sm">{index}</td>
+            <td className="py-5 px-4">
+                <div className="flex flex-col">
+                    <span className="text-white font-medium text-sm">{task.title}</span>
+                    {task.description && <span className="text-slate-500 text-xs truncate max-w-[200px]">{task.description}</span>}
+                </div>
+            </td>
+            <td className="py-5 px-4">
+                <span className={`inline-block px-3 py-1 rounded ${statusInfo.bg} ${statusInfo.text} text-xs font-medium`}>
+                    {statusInfo.label}
+                </span>
+            </td>
+            <td className="py-5 px-4">
+                <span className={`font-semibold capitalize text-sm ${getPriorityColor(task.priority)}`}>
+                    {task.priority}
+                </span>
+            </td>
+            <td className="py-5 px-4 text-slate-400 text-sm">
+                {task.dueDate ? format(new Date(task.dueDate), 'MMM dd, yyyy') : '-'}
+            </td>
+            <td className="py-5 px-4">
+                {task.tags && task.tags.length > 0 ? (
+                    <span className="inline-block px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium">
+                        {task.tags[0]}
+                    </span>
+                ) : (
+                    <span className="text-slate-600">-</span>
+                )}
+            </td>
+            <td className="py-5 px-4">
+                <div className="flex gap-3">
+                    <button
+                        onClick={onEdit}
+                        className="text-slate-400 hover:text-white text-sm transition"
+                    >
+                        Edit
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="text-slate-400 hover:text-red-400 text-sm transition"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </td>
+        </tr>
+    );
+}
+
+// Task Modal Component
+function TaskModal({ task, onClose, onSuccess }: { task?: Task; onClose: () => void; onSuccess: () => void }) {
+    const [formData, setFormData] = useState({
+        title: task?.title || '',
+        description: task?.description || '',
+        status: task?.status || 'pending',
+        priority: task?.priority || 'medium',
+        dueDate: task?.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '',
+        tags: task?.tags?.join(', ') || '',
+    });
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<any>({});
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!formData.title.trim()) {
+            setErrors({ title: 'Title is required' });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const payload = {
+                ...formData,
+                tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+                dueDate: formData.dueDate || undefined,
+            };
+
+            if (task) {
+                await api.put(`/tasks/${task._id}`, payload);
+                toast.success('Task updated successfully');
+            } else {
+                await api.post('/tasks', payload);
+                toast.success('Task created successfully');
+            }
+            onSuccess();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Operation failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1a2642] border border-slate-700 rounded-2xl shadow-2xl p-8 max-w-lg w-full">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-white">{task ? 'Edit Task' : 'Create New Task'}</h2>
+                    <button onClick={onClose} className="p-2 text-slate-400 hover:bg-white/10 hover:text-white rounded-lg transition">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-400 mb-1">Title</label>
+                        <input
+                            type="text"
+                            value={formData.title}
+                            onChange={(e) => {
+                                setFormData({ ...formData, title: e.target.value });
+                                setErrors({ ...errors, title: undefined });
+                            }}
+                            className={`w-full px-4 py-3 bg-[#0f1729] border ${errors.title ? 'border-red-500/50' : 'border-slate-700'} rounded-xl text-white focus:outline-none focus:border-blue-500 transition-all`}
+                            placeholder="e.g., Redesign homepage"
+                        />
+                        {errors.title && <p className="mt-1 text-xs text-red-400">{errors.title}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-400 mb-1">Description</label>
+                        <textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-all min-h-[100px]"
+                            placeholder="Add details about this task..."
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-400 mb-1">Status</label>
+                            <select
+                                value={formData.status}
+                                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                                className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-400 mb-1">Priority</label>
+                            <select
+                                value={formData.priority}
+                                onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
+                                className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                            >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-400 mb-1">Due Date</label>
+                            <input
+                                type="date"
+                                value={formData.dueDate}
+                                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                                className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-400 mb-1">Tags</label>
+                            <input
+                                type="text"
+                                value={formData.tags}
+                                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                                className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                                placeholder="work, urgent"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-6">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 px-6 py-3 border border-slate-600 text-slate-300 rounded-xl font-medium hover:bg-white/5 transition"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                        >
+                            {loading ? 'Saving...' : (task ? 'Save Changes' : 'Create Task')}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+// Profile Modal Component
+function ProfileModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+    const { user, updateUser } = useAuth();
+    const [formData, setFormData] = useState({
+        name: user?.name || '',
+        bio: user?.bio || '',
+        phone: user?.phone || '',
+        location: user?.location || '',
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const response = await api.put('/profile/me', formData);
+            updateUser(response.data.data.user);
+            toast.success('Profile updated successfully');
+            onSuccess();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to update profile');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1a2642] border border-slate-700 rounded-2xl shadow-2xl p-8 max-w-lg w-full">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-white">Edit Profile</h2>
+                    <button onClick={onClose} className="p-2 text-slate-400 hover:bg-white/10 hover:text-white rounded-lg transition">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-400 mb-1">Name</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-all"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-400 mb-1">Bio</label>
+                        <textarea
+                            value={formData.bio}
+                            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                            className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-all min-h-[80px]"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-400 mb-1">Phone</label>
+                        <input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-all"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-400 mb-1">Location</label>
+                        <input
+                            type="text"
+                            value={formData.location}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            className="w-full px-4 py-3 bg-[#0f1729] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-all"
+                        />
+                    </div>
+
+                    <div className="flex gap-3 pt-6">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 px-6 py-3 border border-slate-600 text-slate-300 rounded-xl font-medium hover:bg-white/5 transition"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                        >
+                            {loading ? 'Saving...' : 'Save Profile'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
